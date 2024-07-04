@@ -27,16 +27,17 @@ def preprocess_table(table):
         # Identify the problematic column
         problem_col = table.columns.get_loc("Cl-G")
         # Split the problematic column into Cl-G and Countout
+        # This regex handles the CFTR-O table
         new_cols = table.iloc[:, problem_col].str.extract(r'(?P<Cl_G>CFTR-O)(?P<Countout>[0-9X]+)')
+        if new_cols["Cl_G"][1] != "CFTR-O":  
+            new_cols = table.iloc[:, problem_col].str.extract(r'(?P<Cl_G>F(P|T)R-O) (?P<Countout>[0-9X]+)')
         table["Cl-G"] = new_cols["Cl_G"]
-        table["Countout"] = new_cols["Countout"]
-
+        table["Countout"] = new_cols["Countout"] 
     return table
 
 # Process each table extracted from the PDF
 for table in all_tables:
     table = preprocess_table(table)
-    print(table)
     # Rename the columns for consistency
     table.columns = expected_columns[:table.shape[1]]
     # Define the columns of interest (ensure they exist in the DataFrame)
